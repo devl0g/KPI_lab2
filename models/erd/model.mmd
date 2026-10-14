@@ -1,0 +1,57 @@
+erDiagram
+    user {
+        number user_id PK
+        string username UK
+        string avatar_url
+        string status
+        string platform_role
+        time joined_at
+    }
+
+    community {
+        number community_id PK
+        string title UK
+        string description
+        string slug UK
+        string avatar_url
+        string status
+        number owner_id FK
+        time created_at
+    }
+
+    membership {
+        number community_id PK,FK
+        number user_id PK,FK
+        string community_role
+    }
+
+    personalMessage {
+        number message_id PK
+        number author_id FK
+        string text_content
+        number recipient_id FK
+        number replies_to_id FK "nullable"
+        time created_at
+        time edited_at "nullable"
+    }
+
+    communityMessage {
+        number message_id PK
+        number author_id FK
+        string text_content
+        number community_id FK
+        number replies_to_id FK "nullable"
+        time created_at
+        time edited_at "nullable"
+    }
+
+    user ||--o{ community : "owns"
+    user ||--o{ membership : "joins"
+    user ||--o{ communityMessage : "sends"
+    user ||--o{ personalMessage : "sends"
+    user ||--o{ personalMessage : "receives personal"
+    community ||--o{ membership : "has"
+    community ||--o{ communityMessage : "contains"
+    personalMessage ||--o{ personalMessage : "replies to"
+    communityMessage ||--o{ communityMessage : "replies to"
+
