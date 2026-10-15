@@ -1,0 +1,136 @@
+usecase-beta
+direction LR
+
+actor User('Користувач')
+actor CommunityModerator('Модератор спільноти')
+actor CommunityOwner('Власник спільноти')
+actor PlatformModerator('Модератор платформи')
+actor PlatformAdmin('Власник платформи')
+actor Bot('Бот модерації')
+
+CommunityModerator --|> User
+CommunityOwner --|> CommunityModerator
+PlatformModerator --|> User
+PlatformAdmin --|> PlatformModerator
+
+systemBoundary 'Чат'
+    SendMessageCommunity("Відправити повідомлення у спільноту")
+    SendMessageUser("Відправити повідомлення користувачу")
+    ReplyMessage("Відповісти на повідомлення")
+    DeleteOwnMessage("Видалення власного повідомлення")
+    DeleteCommunityMessage("Видалення повідомлення спільноти")
+
+    CheckMessageExistance("Перевірити існування повідомлення")
+end
+
+systemBoundary 'Спільнота'
+    JoinCommunity("Вступ у спільноту")
+    LeaveCommunity("Вихід з чужої спільноти")
+    SuspendCommunity("Призупинення спільноти")
+    UnsuspendCommunity("Відновлення спільноти")
+    DeleteCommunity("Видалення спільноти")
+    CreateCommunity("Створення спільноти")
+    RetrieveNewMessages("Агрегація нових повідомлень")
+    KickMemberCommunity("Вигнання користувача з спільноти")
+    EditCommunityInfo("Редагування інформації про спільноту")
+    AddModeratorCommunity("Призначення модераторів спільноти")
+    RemoveModeratorCommunity("Позбавлення ролі модератора спільноти")
+
+    CheckCommunityStatus("Перевірити статус спільноти")
+    CheckMembership("Перевірити членство у спільноті")
+    CheckCommunityOwnership("Перевірити власність спільноти")
+    CheckCommunityModerationship("Перевірити статус модератора спільноти або вище")
+    VerifyBotToken("Веріфікувати токен бота")
+end
+
+systemBoundary 'Акаунт'
+    DeactivateOwnAccount("Деактивація власного акаунту")
+    DeactivateAccount("Деактивація акаунтів")
+    ActivateOwnAccount("Активація власного акаунту")
+    ActivateAccount("Активація акаунтів")
+    DeleteAccount("Видалення акаунту")
+    BanAccount("Блокування користувача")
+    UnbanAccount("Розблокування користувача")
+    AddModeratorPlatform("Призначення модераторів платформи")
+    RemoveModeratorPlatform("Позбавлення ролі модератора платформи")
+    AddAdminPlatform("Призначення адмінів платформи")
+    RemoveAdminPlatform("Позбавлення ролі адміна платформи")
+
+    CheckAccountStatus("Отримати статус акаунту")
+    CheckPlatformAdmin("Перевірити статус адміна платформи")
+    CheckPlatformModerationship("Перевірити статус модератора платформи або вище")
+end
+
+%%% Chat
+ReplyMessage ..> : extend SendMessageCommunity
+ReplyMessage ..> : extend SendMessageUser
+DeleteCommunityMessage ..> : extend DeleteOwnMessage
+SendMessageCommunity ..> : include CheckCommunityStatus
+SendMessageCommunity ..> : include CheckMembership
+SendMessageCommunity ..> : include CheckAccountStatus
+SendMessageUser ..> : include CheckAccountStatus
+ReplyMessage ..> : include CheckMessageExistance
+DeleteOwnMessage ..> : include CheckAccountStatus
+DeleteCommunityMessage ..> : include CheckCommunityStatus
+DeleteCommunityMessage ..> : include CheckCommunityModerationship
+
+%%% Community
+JoinCommunity ..> : include CheckAccountStatus
+LeaveCommunity ..> : include CheckCommunityOwnership
+CreateCommunity ..> : include CheckAccountStatus
+EditCommunityInfo ..> : include CheckCommunityOwnership
+AddModeratorCommunity ..> : include CheckCommunityOwnership
+RemoveModeratorCommunity ..> : include CheckCommunityOwnership
+KickMemberCommunity ..> : include CheckCommunityModerationship
+DeleteCommunity ..> : include CheckCommunityOwnership
+RetrieveNewMessages ..> : include VerifyBotToken
+
+%%% Account
+DeactivateOwnAccount ..> : include CheckAccountStatus
+ActivateOwnAccount ..> : include CheckAccountStatus
+DeleteAccount ..> : include CheckAccountStatus
+BanAccount ..> : include CheckPlatformModerationship
+UnbanAccount ..> : include CheckPlatformModerationship
+DeactivateAccount ..> : include CheckPlatformModerationship
+ActivateAccount ..> : include CheckPlatformModerationship
+AddModeratorPlatform ..> : include CheckPlatformAdmin
+RemoveModeratorPlatform ..> : include CheckPlatformAdmin
+AddAdminPlatform ..> : include CheckPlatformAdmin
+RemoveAdminPlatform ..> : include CheckPlatformAdmin
+
+%%% Actors
+User --> SendMessageCommunity
+User --> SendMessageUser
+User --> ReplyMessage
+User --> DeleteOwnMessage
+User --> JoinCommunity
+User --> LeaveCommunity
+User --> CreateCommunity
+User --> DeactivateOwnAccount
+User --> ActivateOwnAccount
+User --> DeleteAccount
+
+CommunityModerator --> DeleteCommunityMessage
+CommunityModerator --> KickMemberCommunity
+
+CommunityOwner --> EditCommunityInfo
+CommunityOwner --> AddModeratorCommunity
+CommunityOwner --> RemoveModeratorCommunity
+CommunityOwner --> DeleteCommunity
+
+PlatformModerator --> SuspendCommunity
+PlatformModerator --> UnsuspendCommunity
+PlatformModerator --> DeleteCommunity
+PlatformModerator --> BanAccount
+PlatformModerator --> UnbanAccount
+PlatformModerator --> DeactivateAccount
+PlatformModerator --> ActivateAccount
+
+PlatformAdmin --> AddModeratorPlatform
+PlatformAdmin --> RemoveModeratorPlatform
+PlatformAdmin --> AddAdminPlatform
+PlatformAdmin --> RemoveAdminPlatform
+PlatformAdmin --> DeleteAccount
+
+Bot --> RetrieveNewMessages
+Bot --> DeleteCommunityMessage
