@@ -21,8 +21,8 @@ systemBoundary 'Чат'
     DeleteCommunityMessage("UC5: Видалення повідомлення спільноти")
     GetCommunityMessages("UC6: Перегляд повідомлень спільнотного чату")
     GetPersonalMessages("UC7: Перегляд повідомлень особистого чату")
-
     CheckMessageExistance("UC8: Перевірити існування повідомлення")
+    EditOwnMessage("UC39: Редагування власного повідомлення")
 end
 
 systemBoundary 'Спільнота'
@@ -77,6 +77,7 @@ DeleteCommunityMessage ..> : include CheckCommunityStatus
 DeleteCommunityMessage ..> : include CheckCommunityModerationship
 GetCommunityMessages ..> : include CheckAccountStatus
 GetPersonalMessages ..> : include CheckAccountStatus
+EditOwnMessage ..> : include CheckAccountStatus
 
 %%% Community
 JoinCommunity ..> : include CheckAccountStatus
@@ -107,6 +108,7 @@ User --> SendMessageCommunity
 User --> SendMessageUser
 User --> ReplyMessage
 User --> DeleteOwnMessage
+User --> EditOwnMessage
 User --> JoinCommunity
 User --> LeaveCommunity
 User --> CreateCommunity
