@@ -14,51 +14,53 @@ PlatformModerator --|> User
 PlatformAdmin --|> PlatformModerator
 
 systemBoundary 'Чат'
-    SendMessageCommunity("Відправити повідомлення у спільноту")
-    SendMessageUser("Відправити повідомлення користувачу")
-    ReplyMessage("Відповісти на повідомлення")
-    DeleteOwnMessage("Видалення власного повідомлення")
-    DeleteCommunityMessage("Видалення повідомлення спільноти")
+    SendMessageCommunity("UC1: Відправити повідомлення у спільноту")
+    SendMessageUser("UC2: Відправити повідомлення користувачу")
+    ReplyMessage("UC3: Відповісти на повідомлення")
+    DeleteOwnMessage("UC4: Видалення власного повідомлення")
+    DeleteCommunityMessage("UC5: Видалення повідомлення спільноти")
+    GetCommunityMessages("UC6: Перегляд повідомлень спільнотного чату")
+    GetPersonalMessages("UC7: Перегляд повідомлень особистого чату")
 
-    CheckMessageExistance("Перевірити існування повідомлення")
+    CheckMessageExistance("UC8: Перевірити існування повідомлення")
 end
 
 systemBoundary 'Спільнота'
-    JoinCommunity("Вступ у спільноту")
-    LeaveCommunity("Вихід з чужої спільноти")
-    SuspendCommunity("Призупинення спільноти")
-    UnsuspendCommunity("Відновлення спільноти")
-    DeleteCommunity("Видалення спільноти")
-    CreateCommunity("Створення спільноти")
-    RetrieveNewMessages("Агрегація нових повідомлень")
-    KickMemberCommunity("Вигнання користувача з спільноти")
-    EditCommunityInfo("Редагування інформації про спільноту")
-    AddModeratorCommunity("Призначення модераторів спільноти")
-    RemoveModeratorCommunity("Позбавлення ролі модератора спільноти")
+    JoinCommunity("UC9: Вступ у спільноту")
+    LeaveCommunity("UC10: Вихід з чужої спільноти")
+    SuspendCommunity("UC11: Призупинення спільноти")
+    UnsuspendCommunity("UC12: Відновлення спільноти")
+    DeleteCommunity("UC13: Видалення спільноти")
+    CreateCommunity("UC14: Створення спільноти")
+    RetrieveNewMessages("UC15: Агрегація нових повідомлень")
+    KickMemberCommunity("UC16: Вигнання користувача з спільноти")
+    EditCommunityInfo("UC17: Редагування інформації про спільноту")
+    AddModeratorCommunity("UC18: Призначення модераторів спільноти")
+    RemoveModeratorCommunity("UC19: Позбавлення ролі модератора спільноти")
 
-    CheckCommunityStatus("Перевірити статус спільноти")
-    CheckMembership("Перевірити членство у спільноті")
-    CheckCommunityOwnership("Перевірити власність спільноти")
-    CheckCommunityModerationship("Перевірити статус модератора спільноти або вище")
-    VerifyBotToken("Веріфікувати токен бота")
+    CheckCommunityStatus("UC20: Перевірити статус спільноти")
+    CheckMembership("UC21: Перевірити членство у спільноті")
+    CheckCommunityOwnership("UC22: Перевірити власність спільноти")
+    CheckCommunityModerationship("UC23: Перевірити статус модератора спільноти або вище")
+    VerifyBotToken("UC24: Веріфікувати токен бота")
 end
 
 systemBoundary 'Акаунт'
-    DeactivateOwnAccount("Деактивація власного акаунту")
-    DeactivateAccount("Деактивація акаунтів")
-    ActivateOwnAccount("Активація власного акаунту")
-    ActivateAccount("Активація акаунтів")
-    DeleteAccount("Видалення акаунту")
-    BanAccount("Блокування користувача")
-    UnbanAccount("Розблокування користувача")
-    AddModeratorPlatform("Призначення модераторів платформи")
-    RemoveModeratorPlatform("Позбавлення ролі модератора платформи")
-    AddAdminPlatform("Призначення адмінів платформи")
-    RemoveAdminPlatform("Позбавлення ролі адміна платформи")
+    DeactivateOwnAccount("UC25: Деактивація власного акаунту")
+    DeactivateAccount("UC26: Деактивація акаунтів")
+    ActivateOwnAccount("UC27: Активація власного акаунту")
+    ActivateAccount("UC28: Активація акаунтів")
+    DeleteAccount("UC29: Видалення акаунту")
+    BanAccount("UC30: Блокування користувача")
+    UnbanAccount("UC31: Розблокування користувача")
+    AddModeratorPlatform("UC32: Призначення модераторів платформи")
+    RemoveModeratorPlatform("UC33: Позбавлення ролі модератора платформи")
+    AddAdminPlatform("UC34: Призначення адмінів платформи")
+    RemoveAdminPlatform("UC35: Позбавлення ролі адміна платформи")
 
-    CheckAccountStatus("Отримати статус акаунту")
-    CheckPlatformAdmin("Перевірити статус адміна платформи")
-    CheckPlatformModerationship("Перевірити статус модератора платформи або вище")
+    CheckAccountStatus("UC36: Отримати статус акаунту")
+    CheckPlatformAdmin("UC37: Перевірити статус адміна платформи")
+    CheckPlatformModerationship("UC38: Перевірити статус модератора платформи або вище")
 end
 
 %%% Chat
@@ -73,6 +75,8 @@ ReplyMessage ..> : include CheckMessageExistance
 DeleteOwnMessage ..> : include CheckAccountStatus
 DeleteCommunityMessage ..> : include CheckCommunityStatus
 DeleteCommunityMessage ..> : include CheckCommunityModerationship
+GetCommunityMessages ..> : include CheckAccountStatus
+GetPersonalMessages ..> : include CheckAccountStatus
 
 %%% Community
 JoinCommunity ..> : include CheckAccountStatus
@@ -109,6 +113,8 @@ User --> CreateCommunity
 User --> DeactivateOwnAccount
 User --> ActivateOwnAccount
 User --> DeleteAccount
+User --> GetCommunityMessages
+User --> GetPersonalMessages
 
 CommunityModerator --> DeleteCommunityMessage
 CommunityModerator --> KickMemberCommunity

@@ -1,136 +1,59 @@
-usecase-beta
-direction LR
+erDiagram
+    user {
+        number user_id PK
+        string username UK
+        string avatar_url
+        string status
+        string platform_role
+        time joined_at
+    }
 
-actor User('Користувач')
-actor CommunityModerator('Модератор спільноти')
-actor CommunityOwner('Власник спільноти')
-actor PlatformModerator('Модератор платформи')
-actor PlatformAdmin('Власник платформи')
-actor Bot('Бот модерації')
+    community {
+        number community_id PK
+        string title UK
+        string description
+        string slug UK
+        string avatar_url
+        string status
+        number owner_id FK
+        time created_at
+        string bot_token "nullable"
+        string bot_last_message_received "nullable"
+    }
 
-CommunityModerator --|> User
-CommunityOwner --|> CommunityModerator
-PlatformModerator --|> User
-PlatformAdmin --|> PlatformModerator
+    membership {
+        number community_id PK,FK
+        number user_id PK,FK
+        string community_role
+    }
 
-systemBoundary 'Чат'
-    SendMessageCommunity("UC1: Відправити повідомлення у спільноту")
-    SendMessageUser("UC2: Відправити повідомлення користувачу")
-    ReplyMessage("UC3: Відповісти на повідомлення")
-    DeleteOwnMessage("UC4: Видалення власного повідомлення")
-    DeleteCommunityMessage("UC5: Видалення повідомлення спільноти")
+    personalMessage {
+        number message_id PK
+        number author_id FK
+        string text_content
+        number recipient_id FK
+        number replies_to_id FK "nullable"
+        time created_at
+        time edited_at "nullable"
+    }
 
-    CheckMessageExistance("UC6: Перевірити існування повідомлення")
-end
+    communityMessage {
+        number message_id PK
+        number author_id FK
+        string text_content
+        number community_id FK
+        number replies_to_id FK "nullable"
+        time created_at
+        time edited_at "nullable"
+    }
 
-systemBoundary 'Спільнота'
-    JoinCommunity("UC7: Вступ у спільноту")
-    LeaveCommunity("UC8: Вихід з чужої спільноти")
-    SuspendCommunity("UC9: Призупинення спільноти")
-    UnsuspendCommunity("UC10: Відновлення спільноти")
-    DeleteCommunity("UC11: Видалення спільноти")
-    CreateCommunity("UC12: Створення спільноти")
-    RetrieveNewMessages("UC13: Агрегація нових повідомлень")
-    KickMemberCommunity("UC14: Вигнання користувача з спільноти")
-    EditCommunityInfo("UC15: Редагування інформації про спільноту")
-    AddModeratorCommunity("UC16: Призначення модераторів спільноти")
-    RemoveModeratorCommunity("UC17: Позбавлення ролі модератора спільноти")
+    user ||--o{ community : "owns"
+    user ||--o{ membership : "joins"
+    user ||--o{ communityMessage : "sends"
+    user ||--o{ personalMessage : "sends"
+    user ||--o{ personalMessage : "receives personal"
+    community ||--o{ membership : "has"
+    community ||--o{ communityMessage : "contains"
+    personalMessage ||--o{ personalMessage : "replies to"
+    communityMessage ||--o{ communityMessage : "replies to"
 
-    CheckCommunityStatus("UC18: Перевірити статус спільноти")
-    CheckMembership("UC19: Перевірити членство у спільноті")
-    CheckCommunityOwnership("UC20: Перевірити власність спільноти")
-    CheckCommunityModerationship("UC21: Перевірити статус модератора спільноти або вище")
-    VerifyBotToken("UC22: Веріфікувати токен бота")
-end
-
-systemBoundary 'Акаунт'
-    DeactivateOwnAccount("UC23: Деактивація власного акаунту")
-    DeactivateAccount("UC24: Деактивація акаунтів")
-    ActivateOwnAccount("UC25: Активація власного акаунту")
-    ActivateAccount("UC26: Активація акаунтів")
-    DeleteAccount("UC27: Видалення акаунту")
-    BanAccount("UC28: Блокування користувача")
-    UnbanAccount("UC29: Розблокування користувача")
-    AddModeratorPlatform("UC30: Призначення модераторів платформи")
-    RemoveModeratorPlatform("UC31: Позбавлення ролі модератора платформи")
-    AddAdminPlatform("UC32: Призначення адмінів платформи")
-    RemoveAdminPlatform("UC33: Позбавлення ролі адміна платформи")
-
-    CheckAccountStatus("UC34: Отримати статус акаунту")
-    CheckPlatformAdmin("UC35: Перевірити статус адміна платформи")
-    CheckPlatformModerationship("UC36: Перевірити статус модератора платформи або вище")
-end
-
-%%% Chat
-ReplyMessage ..> : extend SendMessageCommunity
-ReplyMessage ..> : extend SendMessageUser
-DeleteCommunityMessage ..> : extend DeleteOwnMessage
-SendMessageCommunity ..> : include CheckCommunityStatus
-SendMessageCommunity ..> : include CheckMembership
-SendMessageCommunity ..> : include CheckAccountStatus
-SendMessageUser ..> : include CheckAccountStatus
-ReplyMessage ..> : include CheckMessageExistance
-DeleteOwnMessage ..> : include CheckAccountStatus
-DeleteCommunityMessage ..> : include CheckCommunityStatus
-DeleteCommunityMessage ..> : include CheckCommunityModerationship
-
-%%% Community
-JoinCommunity ..> : include CheckAccountStatus
-LeaveCommunity ..> : include CheckCommunityOwnership
-CreateCommunity ..> : include CheckAccountStatus
-EditCommunityInfo ..> : include CheckCommunityOwnership
-AddModeratorCommunity ..> : include CheckCommunityOwnership
-RemoveModeratorCommunity ..> : include CheckCommunityOwnership
-KickMemberCommunity ..> : include CheckCommunityModerationship
-DeleteCommunity ..> : include CheckCommunityOwnership
-RetrieveNewMessages ..> : include VerifyBotToken
-
-%%% Account
-DeactivateOwnAccount ..> : include CheckAccountStatus
-ActivateOwnAccount ..> : include CheckAccountStatus
-DeleteAccount ..> : include CheckAccountStatus
-BanAccount ..> : include CheckPlatformModerationship
-UnbanAccount ..> : include CheckPlatformModerationship
-DeactivateAccount ..> : include CheckPlatformModerationship
-ActivateAccount ..> : include CheckPlatformModerationship
-AddModeratorPlatform ..> : include CheckPlatformAdmin
-RemoveModeratorPlatform ..> : include CheckPlatformAdmin
-AddAdminPlatform ..> : include CheckPlatformAdmin
-RemoveAdminPlatform ..> : include CheckPlatformAdmin
-
-%%% Actors
-User --> SendMessageCommunity
-User --> SendMessageUser
-User --> ReplyMessage
-User --> DeleteOwnMessage
-User --> JoinCommunity
-User --> LeaveCommunity
-User --> CreateCommunity
-User --> DeactivateOwnAccount
-User --> ActivateOwnAccount
-User --> DeleteAccount
-
-CommunityModerator --> DeleteCommunityMessage
-CommunityModerator --> KickMemberCommunity
-
-CommunityOwner --> EditCommunityInfo
-CommunityOwner --> AddModeratorCommunity
-CommunityOwner --> RemoveModeratorCommunity
-CommunityOwner --> DeleteCommunity
-
-PlatformModerator --> SuspendCommunity
-PlatformModerator --> UnsuspendCommunity
-PlatformModerator --> DeleteCommunity
-PlatformModerator --> BanAccount
-PlatformModerator --> UnbanAccount
-PlatformModerator --> DeactivateAccount
-PlatformModerator --> ActivateAccount
-
-PlatformAdmin --> AddModeratorPlatform
-PlatformAdmin --> RemoveModeratorPlatform
-PlatformAdmin --> AddAdminPlatform
-PlatformAdmin --> RemoveAdminPlatform
-PlatformAdmin --> DeleteAccount
-
-Bot --> RetrieveNewMessages
-Bot --> DeleteCommunityMessage
